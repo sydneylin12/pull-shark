@@ -11,13 +11,13 @@ ITERATIONS = 48
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 SECOND_GITHUB_TOKEN = os.getenv('SECOND_GITHUB_TOKEN')
 REPO_OWNER = "sydneylin12"
-SECOND_OWNER = "sydneylin3"
+SECOND_REPO_OWNER = "sydneylin3"
 REPO_NAME = "pull-shark"
-LOG_FILE = "commit_log.txt"               # Log file to store the date and time of each commit
+SECOND_REPO_NAME = "sydneylin3"
 
 # Creates an issue from account 2
 def create_pull_request():
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/issues"
+    url = f"https://api.github.com/repos/{SECOND_REPO_OWNER}/{REPO_NAME}/issues"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     payload = {
         "title": "Automated issue created at: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -35,7 +35,7 @@ def create_pull_request():
 
 # Main flow
 def main():
-    print("Hello!")
+    create_pull_request
 
 # Do this auto commit 1024 times for the achievement
 if __name__ == "__main__":
