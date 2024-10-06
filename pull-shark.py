@@ -29,7 +29,7 @@ def log_commit():
         log_file.write(f"Commit pushed at {current_time}\n")
 
     subprocess.run(["git", "add", "."])
-    subprocess.run(["git", "commit", "-m", f"Auto-commit \n\n Test \n\n Co-Authored-By: Noah Park <noahjinpark@gmail.com> \n Co-Authored-By: Sydney Lin <183411615+sydneylin3@users.noreply.github.com>"])
+    subprocess.run(["git", "commit", "-m", f"Auto-commit \n\nTest\n\n Co-Authored-By: Noah Park <noahjinpark@gmail.com>\n Co-Authored-By: Sydney Lin <slin3@flexport.com>"])
     subprocess.run(["git", "push", "origin", HEAD_BRANCH])
 
     print(f"Logged commit at {current_time}")
