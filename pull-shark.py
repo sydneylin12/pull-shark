@@ -20,9 +20,16 @@ headers = {"Authorization": f"token {GITHUB_TOKEN}"}
 
 # Function to log the current date and time
 def log_commit():
+    subprocess.run(["git", "checkout", HEAD_BRANCH])
+
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(LOG_FILE, "a") as log_file:
         log_file.write(f"Commit pushed at {current_time}\n")
+
+    subprocess.run(["git", "add", "."])
+    subprocess.run(["git", "commit", "-m", "save"])
+    subprocess.run(["git", "push", "origin", HEAD_BRANCH])
+
     print(f"Logged commit at {current_time}")
 
 # Function to create a new pull request
@@ -54,16 +61,8 @@ def merge_pull_request(pr_number):
     else:
         print(f"Failed to merge pull request: {response.status_code} {response.text}")
 
-# Push the feature branch (if needed)
-def push_branch():
-    subprocess.run(["git", "checkout", HEAD_BRANCH])
-    subprocess.run(["git", "add", "."])
-    subprocess.run(["git", "commit", "-m", "save"])
-    subprocess.run(["git", "push", "origin", HEAD_BRANCH])
-
 # Main flow
 def main():
-    push_branch()
     log_commit()
     pr_number = create_pull_request()
     if pr_number:
