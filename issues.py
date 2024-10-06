@@ -112,7 +112,7 @@ def commentOnDiscussion(discussion_id):
     """ % (discussion_id, solution)
 
     # Post the comment on the discussion
-    response = requests.post(url, headers=secondAccountHeaders, json={"query": post_comment_mutation})
+    response = requests.post(url, headers=firstAccountHeaders, json={"query": post_comment_mutation})
     comment_data = response.json()
 
     if 'errors' in comment_data:
@@ -150,4 +150,5 @@ def main():
     markAnswered(commentId)
 
 if __name__ == "__main__":
-    main()
+    for i in range (48):
+        main()
