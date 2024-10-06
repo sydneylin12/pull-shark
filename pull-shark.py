@@ -2,6 +2,7 @@ import os
 import requests
 import json
 import subprocess
+import time
 from datetime import datetime
 
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
@@ -73,3 +74,4 @@ def main():
 if __name__ == "__main__":
     for i in range (1, 1024):
         main()
+        time.sleep(10)
