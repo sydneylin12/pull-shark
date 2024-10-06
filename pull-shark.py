@@ -63,8 +63,8 @@ def push_branch():
 
 # Main flow
 def main():
-    log_commit()
     push_branch()
+    log_commit()
     pr_number = create_pull_request()
     if pr_number:
         merge_pull_request(pr_number)
