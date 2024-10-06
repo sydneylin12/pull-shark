@@ -18,7 +18,7 @@ SECOND_REPO_NAME = "sydneylin3"
 # Creates an issue from account 2
 def create_pull_request():
     url = f"https://api.github.com/repos/{SECOND_REPO_OWNER}/{SECOND_REPO_NAME}/issues"
-    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+    headers = {"Authorization": f"token {SECOND_GITHUB_TOKEN}"}
     payload = {
         "title": "Automated issue created at: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "body": "Created at: " +datetime.now().strftime("%Y-%m-%d %H:%M:%S")
