@@ -71,5 +71,7 @@ def main():
     if pr_number:
         merge_pull_request(pr_number)
 
+# Do this auto commit 1024 times for the achievement
 if __name__ == "__main__":
-    main()
+    for i in range (1, 1024):
+        main()
