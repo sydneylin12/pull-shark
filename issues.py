@@ -1,43 +1,153 @@
 import os
 import requests
-import json
-import subprocess
 from datetime import datetime
 
-# Achievement target count
-ITERATIONS = 48
-
-# Replace these with your details
+# Account 1 credentials
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-SECOND_GITHUB_TOKEN = os.getenv('SECOND_GITHUB_TOKEN')
 REPO_OWNER = "sydneylin12"
-SECOND_REPO_OWNER = "sydneylin3"
 REPO_NAME = "pull-shark"
+
+# Account 2 credentials
+SECOND_GITHUB_TOKEN = os.getenv('SECOND_GITHUB_TOKEN')
+SECOND_REPO_OWNER = "sydneylin3"
 SECOND_REPO_NAME = "sydneylin3"
 
-# Creates an issue from account 2
-def create_pull_request():
-    url = f"https://api.github.com/repos/{SECOND_REPO_OWNER}/{SECOND_REPO_NAME}/issues"
-    headers = {"Authorization": f"token {SECOND_GITHUB_TOKEN}"}
-    payload = {
-        "title": "Automated issue created at: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "body": "Created at: " +datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
+# Github GraphQL API endpoint
+url = "https://api.github.com/graphql"
 
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
-    if response.status_code == 201:
-        issue_data = response.json()
-        print(f"Issue created: {issue_data['url']}")
-        return issue_data['url']
+# Define headers for the GitHub API request
+baseHeaders = {
+    "Content-Type": "application/json"
+}
+firstAccountHeaders = {
+    "Authorization": f"Bearer {GITHUB_TOKEN}",
+    **baseHeaders
+}
+secondAccountHeaders = {
+    "Authorization": f"Bearer {SECOND_GITHUB_TOKEN}",
+    **baseHeaders
+}
+
+# Creates a github discussion in account 2 and returns the discussion ID
+def createDiscussion():
+    get_repo_and_categories_query = """
+        query {
+            repository(owner: "%s", name: "%s") {
+                id
+                discussionCategories(first: 10) {
+                    nodes {
+                        id
+                        name
+                    }
+                }
+            }
+        }
+    """ % (SECOND_REPO_OWNER, SECOND_REPO_NAME)
+
+    # Fetch repository and discussion categories
+    response = requests.post(url, headers=secondAccountHeaders, json={"query": get_repo_and_categories_query})
+    repo_data = response.json()
+
+    if 'errors' in repo_data:
+        print(f"Error: {repo_data['errors']}")
     else:
-        print(f"Failed to create pull request: {response.status_code} {response.text}")
-        return None
+        repo_id = repo_data['data']['repository']['id']
+        print(f"Repository ID: {repo_id}")
+        
+        # Find the categoryId for the Q&A category
+        categories = repo_data['data']['repository']['discussionCategories']['nodes']
+        qna_category_id = None
+        for category in categories:
+            if category['name'].lower() == 'q&a':
+                qna_category_id = category['id']
+                break
 
-# Main flow
+        if not qna_category_id:
+            print("Error: Q&A category not found.")
+            return
+        
+        print(f"Q&A Category ID: {qna_category_id}")    
+        time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        title = f"Test discussion: {time}"
+        body = f"Test question: {time}"
+
+        create_discussion_mutation = """
+            mutation {
+                createDiscussion(input: {
+                    repositoryId: "%s",
+                    title: "%s",
+                    body: "%s",
+                    categoryId: "%s"
+                }) {
+                    discussion {
+                        id
+                    }
+                }
+            }
+        """ % (repo_id, title, body, qna_category_id)
+
+        create_discussion_response = requests.post(url, headers=secondAccountHeaders, json={"query": create_discussion_mutation})
+        discussion_data = create_discussion_response.json()
+        
+        if 'errors' in discussion_data:
+            print(f"Error: {discussion_data['errors']}")
+        else:
+            discussion_id = discussion_data['data']['createDiscussion']['discussion']['id']
+            print(f"Q&A Discussion created with ID: {discussion_id}")
+            return discussion_id
+            
+def commentOnDiscussion(discussion_id):
+    solution = "Here is a solution!"
+    post_comment_mutation = """
+        mutation {
+            addDiscussionComment(input: {
+                discussionId: "%s",
+                body: "%s"
+            }) {
+                comment {
+                    id
+                }
+            }
+        }
+    """ % (discussion_id, solution)
+
+    # Post the comment on the discussion
+    response = requests.post(url, headers=secondAccountHeaders, json={"query": post_comment_mutation})
+    comment_data = response.json()
+
+    if 'errors' in comment_data:
+        print(f"Error: {comment_data['errors']}")
+    else:
+        comment_id = comment_data['data']['addDiscussionComment']['comment']['id']
+        print(f"Comment posted with ID: {comment_id}")
+        return comment_id
+
+def markAnswered(commentId):
+    mark_answer_mutation = """
+        mutation {
+            markDiscussionCommentAsAnswer(input: {
+                id: "%s"
+            }) {
+                discussion {
+                    url
+                }
+            }
+        }
+    """ % commentId
+     
+    response = requests.post(url, headers=secondAccountHeaders, json={"query": mark_answer_mutation})
+    data = response.json()
+
+    if 'errors' in data:
+       print(f"Error: {data['errors']}")
+    else:
+        discussion_url = data['data']['markDiscussionCommentAsAnswer']['discussion']['url']
+        print(f"Comment marked as the accepted answer for discussion '{discussion_url}'")
+ 
 def main():
-    create_pull_request
+    id = createDiscussion()
+    commentId = commentOnDiscussion(id)
+    markAnswered(commentId)
 
-# Do this auto commit 1024 times for the achievement
 if __name__ == "__main__":
-    for i in range (1, 1024):
-        main()
+    main()
