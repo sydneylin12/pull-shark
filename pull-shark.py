@@ -2,15 +2,27 @@ import os
 import requests
 import json
 import subprocess
+from datetime import datetime  # This line was missing, added now
 
 # Replace these with your details
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # GitHub Personal Access Token
 REPO_OWNER = "sydneylin12"                # GitHub username or organization
 REPO_NAME = "pull-shark"                  # Repository name
 BASE_BRANCH = "main"                      # Target branch (e.g., 'main' or 'master')
-HEAD_BRANCH = "feature"            # Feature branch name
+HEAD_BRANCH = "feature"                   # PR branch name
+LOG_FILE = "commit_log.txt"               # Log file to store the date and time of each commit
+
+# PR metadata
 PR_TITLE = "Auto-generated Pull Request" 
 PR_BODY = "This pull request was created and merged automatically."
+
+
+# Function to log the current date and time
+def log_commit():
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open(LOG_FILE, "a") as log_file:
+        log_file.write(f"Commit pushed at {current_time}\n")
+    print(f"Logged commit at {current_time}")
 
 # Function to create a new pull request
 def create_pull_request():
@@ -47,11 +59,14 @@ def merge_pull_request(pr_number):
 # Push the feature branch (if needed)
 def push_branch():
     subprocess.run(["git", "checkout", HEAD_BRANCH])
+    subprocess.run(["git", "add", "."])
+    subprocess.run(["git", "commit", "-m", "save"])
     subprocess.run(["git", "push", "origin", HEAD_BRANCH])
 
 # Main flow
 def main():
     push_branch()  # Push the branch to remote (if needed)
+    log_commit()   # Log the current date and time
     pr_number = create_pull_request()
     if pr_number:
         merge_pull_request(pr_number)
