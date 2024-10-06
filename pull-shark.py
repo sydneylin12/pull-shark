@@ -42,7 +42,7 @@ def create_pull_request():
         return pr_data['number']  # PR number for merging
     else:
         print(f"Failed to create pull request: {response.status_code} {response.text}")
-        return None
+        raise Exception(f"Failed to create PR with message: {response.status_code} {response.text}")
 
 # Function to merge the pull request
 def merge_pull_request(pr_number):
