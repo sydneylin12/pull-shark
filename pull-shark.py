@@ -11,6 +11,7 @@ REPO_NAME = "pull-shark"
 BASE_BRANCH = "main"
 HEAD_BRANCH = "feature"
 LOG_FILE = "commit_log.txt"
+COAUTHOR_EMAIL = "slin3@flexport.com"
 
 # PR metadata
 PR_TITLE = "Auto-generated Pull Request" 
@@ -28,7 +29,7 @@ def log_commit():
         log_file.write(f"Commit pushed at {current_time}\n")
 
     subprocess.run(["git", "add", "."])
-    subprocess.run(["git", "commit", "-m", "save"])
+    subprocess.run(["git", "commit", "-m", "Co-authored-by: Foo Bar {COAUTHOR_EMAIL}"])
     subprocess.run(["git", "push", "origin", HEAD_BRANCH])
 
     print(f"Logged commit at {current_time}")
