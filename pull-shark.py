@@ -29,7 +29,7 @@ def log_commit():
         log_file.write(f"Commit pushed at {current_time}\n")
 
     subprocess.run(["git", "add", "."])
-    subprocess.run(["git", "commit", "-m", f"Co-authored-by: Foo Bar {COAUTHOR_EMAIL}"])
+    subprocess.run(["git", "commit", "-m", f"Co-authored-by: Foo Bar <{COAUTHOR_EMAIL}>"])
     subprocess.run(["git", "push", "origin", HEAD_BRANCH])
 
     print(f"Logged commit at {current_time}")
